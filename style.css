@@ -1,0 +1,13 @@
+body {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  font-family: Arial, sans-serif;
+  background-color: #222;
+  color: #fff;
+}
+
+canvas {
+  border: 2px solid #fff;
+  margin-top: 20px;
+}
