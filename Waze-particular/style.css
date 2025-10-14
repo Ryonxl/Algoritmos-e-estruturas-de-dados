@@ -1,0 +1,17 @@
+ body {
+    text-align: center;
+    font-family: Arial;
+    background: #f5f5f5;
+  }
+  h1 { margin: 10px; }
+  canvas {
+    background: #ddd;
+    border: 2px solid #444;
+    cursor: pointer;
+  }
+  button {
+    margin: 10px;
+    padding: 10px 15px;
+    font-size: 16px;
+    cursor: pointer;
+  }
