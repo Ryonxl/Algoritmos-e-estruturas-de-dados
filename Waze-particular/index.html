@@ -1,20 +1,42 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<link rel="stylesheet" href="style.css">
-<title>Waze Particular - Arrays Clássicos</title>
+  <meta charset="UTF-8">
+  <title>Mini Waze - Cidade em Grade</title>
+  <link rel="stylesheet" href="style.css">
 </head>
-
 <body>
-<h1>🧭 Waze Particular (com Arrays Clássicos)</h1>
-<p>Clique para marcar Início (verde) → Destino (vermelho). O sistema encontra o caminho com BFS.</p>
-<canvas id="mapa" width="400" height="400"></canvas><br>
-<button onclick="gerarObstaculos()">Gerar Obstáculos</button>
-<button onclick="resetar()">Resetar</button>
+  <h1>Mini Waze - Caminho na Cidade</h1>
 
-<script src="index.js"></script>
+  <!-- Botões para definir tipos de elementos no mapa -->
+  <div>
+    <button onclick="setTipoElemento(0)">Rua</button>
+    <button onclick="setTipoElemento(1)">Casa</button>
+    <button onclick="setTipoElemento(6)">Praça</button>
+    <button onclick="setTipoElemento(7)">Prédio</button>
+    <button onclick="setTipoElemento(2)">Início</button>
+    <button onclick="setTipoElemento(3)">Destino</button>
+    <button onclick="setTipoElemento(4)">Engarrafamento</button>
+  </div>
 
+  <!-- Botões de controle -->
+  <div>
+    <button onclick="gerarEngarrafamento()">Gerar Engarrafamento Aleatório</button>
+    <button onclick="resetar()">Resetar</button>
+  </div>
+
+
+  <div style="margin-top: 15px;">
+  <input type="text" id="nomeCidade" placeholder="Nome da cidade">
+  <button onclick="salvarMapa()">💾 Salvar Cidade</button>
+  <button onclick="carregarMapa()">📂 Carregar Cidade</button>
+  <select id="listaCidades" onchange="selecionarCidade(this.value)">
+    <option value="">-- Cidades salvas --</option>
+  </select>
+</div>
+
+  <canvas id="mapa" width="400" height="400"></canvas>
+
+  <script src="index.js"></script>
 </body>
 </html>

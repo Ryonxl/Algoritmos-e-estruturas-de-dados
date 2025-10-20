@@ -7,6 +7,7 @@ let mapa = [];      // matriz [y][x]
 let inicio = null;
 let destino = null;
 let caminho = [];
+let tipoDeElemento = 0;  // Padrão: rua (0)
 
 // Criar matriz inicial (array clássico)
 function criarMapa() {
@@ -20,48 +21,70 @@ function criarMapa() {
   desenharMapa();
 }
 
-// Desenha cada célula
+// Desenha cada célula com base no tipo
 function desenharMapa() {
   for (let y = 0; y < tamanho; y++) {
     for (let x = 0; x < tamanho; x++) {
-      if (mapa[y][x] === 0) ctx.fillStyle = "#ccc"; // rua
-      if (mapa[y][x] === 1) ctx.fillStyle = "#333"; // obstáculo
-      if (mapa[y][x] === 2) ctx.fillStyle = "green"; // início
-      if (mapa[y][x] === 3) ctx.fillStyle = "red"; // destino
+      switch (mapa[y][x]) {
+        case 0: ctx.fillStyle = "#ccc"; break;       // Rua
+        case 1: ctx.fillStyle = "#333"; break;       // Obstáculo (manual)
+        case 2: ctx.fillStyle = "green"; break;      // Início
+        case 3: ctx.fillStyle = "red"; break;        // Destino
+        case 4: ctx.fillStyle = "#ff6347"; break;    // Engarrafamento
+        case 6: ctx.fillStyle = "#00bcd4"; break;    // Praça
+        case 7: ctx.fillStyle = "#8e44ad"; break;    // Prédio
+        case 5: ctx.fillStyle = "#ffeb3b"; break;    // Casa (opcional extra)
+        default: ctx.fillStyle = "#999"; break;
+      }
       ctx.fillRect(x * celula, y * celula, celula - 1, celula - 1);
     }
   }
 }
 
-// Converter clique para coordenadas
+// Define o tipo de elemento a ser colocado no clique
+function setTipoElemento(tipo) {
+  tipoDeElemento = tipo;
+}
+
+// Clique no canvas
 canvas.addEventListener("click", (e) => {
   const rect = canvas.getBoundingClientRect();
   const x = Math.floor((e.clientX - rect.left) / celula);
   const y = Math.floor((e.clientY - rect.top) / celula);
 
-  if (!inicio) {
-    mapa[y][x] = 2;
+  const valor = mapa[y][x];
+
+  // Definindo início e destino de forma exclusiva
+  if (tipoDeElemento === 2) {
+    if (inicio) mapa[inicio.y][inicio.x] = 0;
     inicio = { x, y };
-  } else if (!destino) {
-    mapa[y][x] = 3;
+  }
+
+  if (tipoDeElemento === 3) {
+    if (destino) mapa[destino.y][destino.x] = 0;
     destino = { x, y };
+  }
+
+  mapa[y][x] = tipoDeElemento;
+  desenharMapa();
+
+  // Se início e destino estão definidos, tenta encontrar caminho
+  if (inicio && destino) {
     encontrarCaminho();
   }
-  desenharMapa();
 });
 
-// Gerar obstáculos aleatórios
-function gerarObstaculos() {
-  resetar();
-  for (let i = 0; i < 25; i++) {
+// Gera engarrafamentos aleatórios em ruas
+function gerarEngarrafamento() {
+  for (let i = 0; i < 10; i++) {
     const x = Math.floor(Math.random() * tamanho);
     const y = Math.floor(Math.random() * tamanho);
-    if (mapa[y][x] === 0) mapa[y][x] = 1;
+    if (mapa[y][x] === 0) mapa[y][x] = 4; // 4 = engarrafamento
   }
   desenharMapa();
 }
 
-// Resetar o mapa
+// Resetar tudo
 function resetar() {
   inicio = null;
   destino = null;
@@ -69,33 +92,22 @@ function resetar() {
   criarMapa();
 }
 
-// Implementação de BFS usando arrays clássicos
+// Busca caminho com BFS (evita obstáculos e engarrafamentos)
 function encontrarCaminho() {
-  const filaX = [];
-  const filaY = [];
-  const visitado = [];
-  const anterior = [];
+  const fila = [];
+  const visitado = Array.from({ length: tamanho }, () => Array(tamanho).fill(false));
+  const anterior = Array.from({ length: tamanho }, () => Array(tamanho).fill(null));
 
-  for (let y = 0; y < tamanho; y++) {
-    visitado[y] = [];
-    anterior[y] = [];
-    for (let x = 0; x < tamanho; x++) {
-      visitado[y][x] = false;
-      anterior[y][x] = null;
-    }
-  }
-
-  filaX.push(inicio.x);
-  filaY.push(inicio.y);
+  fila.push(inicio);
   visitado[inicio.y][inicio.x] = true;
 
   const dx = [1, -1, 0, 0];
   const dy = [0, 0, 1, -1];
   let encontrou = false;
 
-  while (filaX.length > 0) {
-    const x = filaX.shift();
-    const y = filaY.shift();
+  while (fila.length > 0) {
+    const atual = fila.shift();
+    const { x, y } = atual;
 
     if (x === destino.x && y === destino.y) {
       encontrou = true;
@@ -105,14 +117,14 @@ function encontrarCaminho() {
     for (let i = 0; i < 4; i++) {
       const nx = x + dx[i];
       const ny = y + dy[i];
+
       if (
         nx >= 0 && nx < tamanho &&
         ny >= 0 && ny < tamanho &&
         !visitado[ny][nx] &&
-        (mapa[ny][nx] === 0 || mapa[ny][nx] === 3)
+        [0, 3].includes(mapa[ny][nx])  // Só passa por rua e destino
       ) {
-        filaX.push(nx);
-        filaY.push(ny);
+        fila.push({ x: nx, y: ny });
         visitado[ny][nx] = true;
         anterior[ny][nx] = { x, y };
       }
@@ -135,7 +147,7 @@ function encontrarCaminho() {
   animarCaminho();
 }
 
-// Anima o deslocamento do carro
+// Anima o caminho com azul
 function animarCaminho() {
   let i = 0;
   const timer = setInterval(() => {
@@ -150,4 +162,71 @@ function animarCaminho() {
   }, 200);
 }
 
+// Salvar mapa atual no localStorage
+function salvarMapa() {
+  const nome = document.getElementById("nomeCidade").value.trim();
+  if (!nome) {
+    alert("Digite um nome para a cidade!");
+    return;
+  }
+
+  const dados = {
+    mapa: mapa,
+    inicio: inicio,
+    destino: destino
+  };
+
+  localStorage.setItem("cidade_" + nome, JSON.stringify(dados));
+  alert("✅ Cidade salva como: " + nome);
+  atualizarListaCidades();
+}
+
+// Carregar mapa pelo nome digitado
+function carregarMapa() {
+  const nome = document.getElementById("nomeCidade").value.trim();
+  if (!nome) {
+    alert("Digite o nome da cidade para carregar!");
+    return;
+  }
+
+  const dados = localStorage.getItem("cidade_" + nome);
+  if (!dados) {
+    alert("❌ Cidade não encontrada.");
+    return;
+  }
+
+  const { mapa: m, inicio: ini, destino: dest } = JSON.parse(dados);
+  mapa = m;
+  inicio = ini;
+  destino = dest;
+  desenharMapa();
+
+  if (inicio && destino) encontrarCaminho();
+}
+
+// Atualizar a lista de cidades no <select>
+function atualizarListaCidades() {
+  const select = document.getElementById("listaCidades");
+  select.innerHTML = '<option value="">-- Cidades salvas --</option>';
+
+  for (let i = 0; i < localStorage.length; i++) {
+    const chave = localStorage.key(i);
+    if (chave.startsWith("cidade_")) {
+      const nome = chave.replace("cidade_", "");
+      const option = document.createElement("option");
+      option.value = nome;
+      option.textContent = nome;
+      select.appendChild(option);
+    }
+  }
+}
+
+// Carregar cidade ao selecionar do dropdown
+function selecionarCidade(nome) {
+  if (!nome) return;
+  document.getElementById("nomeCidade").value = nome;
+  carregarMapa();
+}
+
 criarMapa();
+atualizarListaCidades(); // Atualiza a lista ao abrir a página
