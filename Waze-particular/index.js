@@ -1,6 +1,12 @@
+// -------------------------------
+// Mini Waze - Versão Final (Grid 1000x600)
+// -------------------------------
+
+// Classe responsável por representar o mapa da cidade
 class Cidade {
-  constructor(tamanho, ctx, celula) {
-    this.tamanho = tamanho;
+  constructor(largura, ctx, celula, altura = largura) {
+    this.largura = largura;   // número de colunas
+    this.altura = altura;     // número de linhas
     this.ctx = ctx;
     this.celula = celula;
     this.mapa = this.criarMapa();
@@ -11,10 +17,10 @@ class Cidade {
 
   // Cria um array bidimensional clássico
   criarMapa() {
-    const m = new Array(this.tamanho);
-    for (let y = 0; y < this.tamanho; y++) {
-      m[y] = new Array(this.tamanho);
-      for (let x = 0; x < this.tamanho; x++) {
+    const m = new Array(this.altura);
+    for (let y = 0; y < this.altura; y++) {
+      m[y] = new Array(this.largura);
+      for (let x = 0; x < this.largura; x++) {
         m[y][x] = 0;
       }
     }
@@ -24,13 +30,13 @@ class Cidade {
   // Redesenha o mapa
   desenharMapa() {
     const ctx = this.ctx;
-    ctx.clearRect(0, 0, this.tamanho * this.celula, this.tamanho * this.celula);
+    ctx.clearRect(0, 0, this.largura * this.celula, this.altura * this.celula);
     ctx.textAlign = "center";
     ctx.textBaseline = "middle";
     ctx.font = "28px Arial";
 
-    for (let y = 0; y < this.tamanho; y++) {
-      for (let x = 0; x < this.tamanho; x++) {
+    for (let y = 0; y < this.altura; y++) {
+      for (let x = 0; x < this.largura; x++) {
         const tipo = this.mapa[y][x];
         const px = x * this.celula;
         const py = y * this.celula;
@@ -43,7 +49,7 @@ class Cidade {
           case 1: ctx.fillText("🏠", px + this.celula / 2, py + this.celula / 2); break;
           case 2: ctx.fillText("🚗", px + this.celula / 2, py + this.celula / 2); break;
           case 3: ctx.fillText("📍", px + this.celula / 2, py + this.celula / 2); break;
-          case 4: ctx.fillText("🔥", px + this.celula / 2, py + this.celula / 2); break;
+          case 4: ctx.fillText("⛔️", px + this.celula / 2, py + this.celula / 2); break;
           case 6: ctx.fillText("🌳", px + this.celula / 2, py + this.celula / 2); break;
           case 7: ctx.fillText("🏢", px + this.celula / 2, py + this.celula / 2); break;
         }
@@ -51,7 +57,6 @@ class Cidade {
     }
   }
 
-  // Define elemento clicado
   definirElemento(x, y, tipo) {
     if (tipo === 2) { // início
       if (this.inicio) this.mapa[this.inicio.y][this.inicio.x] = 0;
@@ -66,11 +71,10 @@ class Cidade {
     this.desenharMapa();
   }
 
-  // Gera engarrafamentos aleatórios (sem push)
   gerarEngarrafamento(qtd) {
     for (let i = 0; i < qtd; i++) {
-      const x = Math.floor(Math.random() * this.tamanho);
-      const y = Math.floor(Math.random() * this.tamanho);
+      const x = Math.floor(Math.random() * this.largura);
+      const y = Math.floor(Math.random() * this.altura);
       if (this.mapa[y][x] === 0) {
         this.mapa[y][x] = 4;
       }
@@ -86,7 +90,6 @@ class Cidade {
     this.desenharMapa();
   }
 
-  // Salvar e carregar com localStorage
   salvar(nome) {
     const dados = {
       mapa: this.mapa,
@@ -117,19 +120,19 @@ class Navegador {
   }
 
   encontrarCaminho() {
-    const { tamanho, mapa, inicio, destino } = this.cidade;
+    const { largura, altura, mapa, inicio, destino } = this.cidade;
     if (!inicio || !destino) return;
 
-    const fila = new Array(tamanho * tamanho);
+    const fila = new Array(largura * altura);
     let filaInicio = 0;
     let filaFim = 0;
 
-    const visitado = new Array(tamanho);
-    const anterior = new Array(tamanho);
-    for (let y = 0; y < tamanho; y++) {
-      visitado[y] = new Array(tamanho);
-      anterior[y] = new Array(tamanho);
-      for (let x = 0; x < tamanho; x++) {
+    const visitado = new Array(altura);
+    const anterior = new Array(altura);
+    for (let y = 0; y < altura; y++) {
+      visitado[y] = new Array(largura);
+      anterior[y] = new Array(largura);
+      for (let x = 0; x < largura; x++) {
         visitado[y][x] = false;
         anterior[y][x] = null;
       }
@@ -156,8 +159,8 @@ class Navegador {
         const ny = y + dy[i];
 
         if (
-          nx >= 0 && nx < tamanho &&
-          ny >= 0 && ny < tamanho &&
+          nx >= 0 && nx < largura &&
+          ny >= 0 && ny < altura &&
           !visitado[ny][nx] &&
           (mapa[ny][nx] === 0 || mapa[ny][nx] === 3)
         ) {
@@ -180,7 +183,6 @@ class Navegador {
       p = anterior[p.y][p.x];
     }
 
-    // Inverter caminho manualmente
     const caminhoFinal = [];
     for (let i = caminhoTemp.length - 1, j = 0; i >= 0; i--, j++) {
       caminhoFinal[j] = caminhoTemp[i];
@@ -206,12 +208,11 @@ class Navegador {
       }
 
       i++;
-      
-      // Quando o carro chega ao destino final:
-    if (i > caminho.length) {
-      clearInterval(timer);
-      alert("🚗 Você chegou ao destino evitando engarrafamentos e pegando o caminho mais rápido!");
-    }
+       if (i > caminho.length) {
+        clearInterval(timer);
+        // ✅ Mensagem ao chegar no destino
+        alert("🚗 Você chegou ao destino evitando engarrafamentos e pegando o caminho mais rápido!");
+      }
     }, 200);
   }
 }
@@ -224,7 +225,7 @@ class App {
     this.canvas = document.getElementById("mapa");
     this.ctx = this.canvas.getContext("2d");
     this.tipoElemento = 0;
-    this.cidade = new Cidade(10, this.ctx, 40);
+    this.cidade = new Cidade(25, this.ctx, 40, 15);
     this.navegador = new Navegador(this.cidade);
 
     this.configurarEventos();
@@ -250,7 +251,7 @@ class App {
   }
 
   gerarEngarrafamento() {
-    this.cidade.gerarEngarrafamento(10);
+    this.cidade.gerarEngarrafamento(20);
   }
 
   resetar() {
@@ -306,92 +307,106 @@ class App {
 }
 
 // -------------------------------
-// Cria cidades exemplo automaticamente se não existirem
+// Cidades exemplo pré-carregadas (grid 25x15)
 // -------------------------------
 function criarCidadesExemplo() {
   const cidadesExemplo = [
     {
       nome: "Cidade Verde",
       mapa: [
-        [1,0,6,0,1,0,6,0,1,0],
-        [0,1,0,1,0,0,0,1,0,7],
-        [6,0,0,0,0,0,0,7,0,0],
-        [0,1,6,0,0,0,0,0,0,6],
-        [7,0,1,0,0,6,0,1,0,0],
-        [0,0,0,7,0,1,0,0,1,0],
-        [6,0,0,0,0,0,1,6,0,1],
-        [0,0,0,0,0,0,7,0,1,0],
-        [1,0,6,0,1,0,0,0,6,0],
-        [0,1,0,0,0,7,0,1,0,1],
+        [1,1,6,1,1,0,1,1,0,6,0,7,0,6,0,7,0,6,0,7,1,1,6,1,1],
+        [1,0,1,0,1,0,1,0,1,0,6,0,1,0,1,0,7,0,1,0,1,0,1,0,1],
+        [6,1,0,1,6,0,7,0,6,0,7,0,6,0,7,0,6,0,7,0,6,1,0,1,6],
+        [1,0,1,0,1,0,0,0,0,6,0,0,0,6,0,0,0,1,0,7,0,1,0,1,0],
+        [1,1,1,0,0,0,6,0,0,0,6,0,0,0,6,0,0,0,7,0,0,0,1,1,1],
+        [7,0,0,0,6,0,0,0,1,0,0,0,1,0,0,0,6,0,0,0,6,0,0,0,7],
+        [1,0,1,0,0,0,7,0,1,0,0,0,1,0,7,0,0,0,6,0,1,0,1,0,1],
+        [1,1,6,1,1,0,1,0,6,0,7,0,6,0,1,0,1,0,7,1,1,6,1,1,1],
+        [1,0,1,0,1,0,1,0,7,0,6,0,7,0,1,0,1,0,6,0,1,0,1,0,1],
+        [6,1,0,1,6,0,7,0,6,0,7,0,6,0,7,0,6,0,7,0,6,1,0,1,6],
+        [1,0,1,0,1,0,0,0,0,6,0,0,0,6,0,0,0,1,0,7,0,1,0,1,0],
+        [1,1,1,0,0,0,6,0,0,0,6,0,0,0,6,0,0,0,7,0,0,0,1,1,1],
+        [7,0,0,0,6,0,0,0,1,0,0,0,1,0,0,0,6,0,0,0,6,0,0,0,7],
+        [1,0,1,0,0,0,7,0,1,0,0,0,1,0,7,0,0,0,6,0,1,0,1,0,1],
+        [1,1,6,1,1,0,1,0,6,0,7,0,6,0,1,0,1,0,7,1,1,6,1,1,1],
       ]
     },
     {
       nome: "Cidade Central",
       mapa: [
-        [7,1,0,7,1,0,6,1,0,1],
-        [1,7,6,0,1,0,0,0,1,0],
-        [0,1,0,0,0,0,0,7,1,0],
-        [7,0,0,0,0,1,6,0,1,0],
-        [0,0,0,0,0,7,0,1,0,7],
-        [1,0,0,0,7,1,0,6,7,0],
-        [0,0,0,0,0,1,0,0,1,0],
-        [1,0,0,0,0,0,0,0,0,1],
-        [0,1,0,0,1,0,1,0,7,0],
-        [1,0,1,7,0,1,0,1,0,7],
+        [7,7,7,1,1,0,6,1,0,1,7,1,0,6,1,0,1,7,0,1,7,7,7,1,1],
+        [1,7,1,0,1,0,7,0,1,0,1,0,7,0,1,0,7,0,1,0,1,7,1,0,1],
+        [0,1,0,1,0,1,0,7,1,0,1,0,1,0,6,0,1,0,1,0,0,1,0,1,0],
+        [7,0,7,1,0,0,6,0,0,0,7,0,0,0,7,0,0,0,1,0,7,0,7,1,0],
+        [0,7,0,1,0,7,0,1,0,7,0,1,0,1,0,7,0,1,0,7,0,1,0,7,0],
+        [1,0,1,0,7,1,0,6,1,0,1,0,7,1,0,1,0,7,1,0,1,0,7,1,0],
+        [0,7,0,1,0,0,0,0,0,1,0,0,0,0,0,1,0,0,7,0,1,0,1,0,0],
+        [1,0,1,0,1,0,1,7,0,1,0,1,0,1,0,1,0,7,0,1,0,1,0,1,0],
+        [0,1,7,0,1,0,1,0,7,0,1,0,1,0,7,0,1,0,1,0,1,0,1,0,0],
+        [7,1,0,1,0,0,6,0,0,0,7,0,0,0,7,0,0,0,1,0,7,1,0,1,0],
+        [1,0,1,0,1,0,0,0,0,6,0,0,0,6,0,0,0,1,0,7,0,1,0,1,0],
+        [1,1,1,0,0,0,6,0,0,0,6,0,0,0,6,0,0,0,7,0,0,0,1,1,1],
+        [7,0,0,0,6,0,0,0,1,0,0,0,1,0,0,0,6,0,0,0,6,0,0,0,7],
+        [1,0,1,0,0,0,7,0,1,0,0,0,1,0,7,0,0,0,6,0,1,0,1,0,1],
+        [1,1,6,1,1,0,1,0,6,0,7,0,6,0,1,0,1,0,7,1,1,6,1,1,1],
       ]
     },
     {
       nome: "Cidade Litorânea",
       mapa: [
-        [0,6,0,7,0,6,0,7,0,6],
-        [1,0,1,0,1,0,1,0,1,0],
-        [0,1,6,0,7,0,6,0,7,0],
-        [1,0,1,0,1,0,1,0,1,0],
-        [0,7,0,6,0,7,0,6,0,7],
-        [1,0,1,0,1,0,1,0,1,0],
-        [0,1,0,1,0,1,0,1,0,1],
-        [6,0,7,0,6,0,7,0,6,0],
-        [0,1,0,1,0,1,0,1,0,1],
-        [1,0,1,0,1,0,1,0,1,0],
+        [0,6,0,7,0,6,0,7,0,6,0,7,0,6,0,7,0,6,0,7,0,6,0,7,0],
+        [1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1],
+        [0,1,6,0,7,0,6,0,7,0,6,0,7,0,6,0,7,0,6,0,7,0,6,0,7],
+        [1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1],
+        [0,7,0,6,0,7,0,6,0,7,0,6,0,7,0,6,0,7,0,6,0,7,0,6,0],
+        [1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1],
+        [0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0],
+        [6,0,7,0,6,0,7,0,6,0,7,0,6,0,7,0,6,0,7,0,6,0,7,0,6],
+        [0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0],
+        [1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1],
+        [0,7,0,6,0,7,0,6,0,7,0,6,0,7,0,6,0,7,0,6,0,7,0,6,0],
+        [1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1],
+        [0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0],
+        [6,0,7,0,6,0,7,0,6,0,7,0,6,0,7,0,6,0,7,0,6,0,7,0,6],
+        [0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0],
       ]
     }
   ];
 
+  // Salva as cidades no localStorage
   for (let i = 0; i < cidadesExemplo.length; i++) {
     const c = cidadesExemplo[i];
     const chave = "cidade_" + c.nome;
     localStorage.setItem(chave, JSON.stringify({
-  mapa: c.mapa,
-  inicio: null,
-  destino: null
-}));
+      mapa: c.mapa,
+      inicio: null,
+      destino: null
+    }));
+  }
+
+
+  // Salva no localStorage
+  for (let i = 0; i < cidadesExemplo.length; i++) {
+    const c = cidadesExemplo[i];
+    const chave = "cidade_" + c.nome;
+    localStorage.setItem(chave, JSON.stringify({
+      mapa: c.mapa,
+      inicio: null,
+      destino: null
+    }));
   }
 }
-
-// Garante que as cidades exemplo existam antes de iniciar o app
-criarCidadesExemplo();
 
 // -------------------------------
 // Inicialização
 // -------------------------------
+criarCidadesExemplo();
 const app = new App();
 
-// Funções globais chamadas pelo HTML
-function setTipoElemento(tipo) { 
-  app.setTipoElemento(tipo); 
-}
-function gerarEngarrafamento() { 
-  app.gerarEngarrafamento(); 
-}
-function resetar() { 
-  app.resetar(); 
-}
-function salvarMapa() { 
-  app.salvarMapa(); 
-}
-function carregarMapa() { 
-  app.carregarMapa(); 
-}
-function selecionarCidade(nome) { 
-  app.selecionarCidade(nome); 
-}
+// Funções globais
+function setTipoElemento(tipo) { app.setTipoElemento(tipo); }
+function gerarEngarrafamento() { app.gerarEngarrafamento(); }
+function resetar() { app.resetar(); }
+function salvarMapa() { app.salvarMapa(); }
+function carregarMapa() { app.carregarMapa(); }
+function selecionarCidade(nome) { app.selecionarCidade(nome); }
