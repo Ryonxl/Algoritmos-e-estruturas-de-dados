@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <title>Oficina Futurista - Reparo de Robôs</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <h1>🔧 Oficina Futurista - Jogo de Reparo de Robôs</h1>
+
+    <div class="controls">
+        <button onclick="spawnRobot()">Adicionar Robô</button>
+        <button onclick="repairSelectedRobot()">Consertar Componente</button>
+    </div>
+
+    <div id="game-area">
+
+        <div id="robot-list">
+            <h2>Robôs na Oficina</h2>
+            <div id="robots"></div>
+        </div>
+
+        <div id="details">
+            <h2>Detalhes do Robô Selecionado</h2>
+            <p id="selected-info">Nenhum robô selecionado</p>
+
+            <h3>Pilha de Componentes</h3>
+            <div id="stack"></div>
+
+            <input type="text" id="codeInput" placeholder="Digite o código do componente">
+            <button onclick="verifyCode()">Enviar Código</button>
+        </div>
+
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
