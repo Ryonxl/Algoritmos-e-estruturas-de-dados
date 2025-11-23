@@ -25,7 +25,7 @@ function iniciarJogo() {
     }
 
     // Redireciona para a página do jogo
-    window.location.href = "index.html";
+    window.location.href = "game.html";
 }
 
 function abrirRanking() {
