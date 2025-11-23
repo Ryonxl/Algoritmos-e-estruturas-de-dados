@@ -2,38 +2,32 @@
 <html lang="pt-br">
 <head>
     <meta charset="UTF-8">
-    <title>Oficina Futurista - Reparo de Robôs</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Oficina de Robôs - Menu</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
-    <h1>🔧 Oficina Futurista - Jogo de Reparo de Robôs</h1>
+    <div class="menu-container">
+        <h1 class="titulo">⚙️ Oficina de Robôs</h1>
+        <p class="subtitulo">Simulador Futurista de Manutenção</p>
 
-    <div class="controls">
-        <button onclick="spawnRobot()">Adicionar Robô</button>
-        <button onclick="repairSelectedRobot()">Consertar Componente</button>
-    </div>
+        <!-- Campo de nome do jogador -->
+        <div class="NameUser">
+        <input id="nomeJogador" type="text" placeholder="Digite seu nome..." class="input-nome">
 
-    <div id="game-area">
-
-        <div id="robot-list">
-            <h2>Robôs na Oficina</h2>
-            <div id="robots"></div>
+        <button class="btn-salvar" onclick="salvarNome()">Salvar</button>
         </div>
 
-        <div id="details">
-            <h2>Detalhes do Robô Selecionado</h2>
-            <p id="selected-info">Nenhum robô selecionado</p>
-
-            <h3>Pilha de Componentes</h3>
-            <div id="stack"></div>
-
-            <input type="text" id="codeInput" placeholder="Digite o código do componente">
-            <button onclick="verifyCode()">Enviar Código</button>
+        <div class="menu-buttons">
+            <button onclick="iniciarJogo()">Iniciar Jogo</button>
+            <button onclick="abrirRanking()">Ranking</button>
+            <button onclick="sair()">Sair</button>
         </div>
 
+        <p id="statusSalvar" class="status"></p>
     </div>
 
-    <script src="script.js"></script>
+    <script src="index.js"></script>
 </body>
 </html>

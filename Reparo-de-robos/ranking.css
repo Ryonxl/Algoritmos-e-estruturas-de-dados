@@ -1,0 +1,61 @@
+body {
+    font-family: Arial, sans-serif;
+    background: #222;
+    color: #fff;
+    text-align: center;
+    margin: 0;
+    padding: 20px;
+}
+
+h1 {
+    margin-bottom: 20px;
+    font-size: 36px;
+}
+
+/* Container dos cards */
+.cards-container {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 20px;
+}
+
+/* Cada card do ranking */
+.card {
+    background: #333;
+    width: 260px;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 0 10px #000;
+    text-align: left;
+    transition: 0.2s;
+}
+
+.card:hover {
+    transform: scale(1.05);
+}
+
+.card h2 {
+    margin: 0;
+    font-size: 22px;
+    color: #ffd700;
+}
+
+.card p {
+    margin: 8px 0;
+    font-size: 16px;
+}
+
+.voltar {
+    display: inline-block;
+    margin-top: 30px;
+    color: #fff;
+    text-decoration: none;
+    padding: 12px 20px;
+    background: #444;
+    border-radius: 8px;
+}
+
+.voltar:hover {
+    background: #555;
+}

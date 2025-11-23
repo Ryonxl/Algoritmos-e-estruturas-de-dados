@@ -1,4 +1,50 @@
 /* ============================
+   SISTEMA DE NOME + RANKING
+   ============================ */
+
+// ❌ REMOVIDO window.onload (estava iniciando o jogo sem nome)
+
+function salvarNome() {
+    const nome = document.getElementById("nomeInput").value;
+
+    if (nome.trim() === "") {
+        alert("Digite um nome válido!");
+        return;
+    }
+
+    localStorage.setItem("nomeJogador", nome);
+
+    // salva o início do jogo
+    localStorage.setItem("tempoInicio", Date.now());
+
+    iniciarJogo(nome);
+}
+
+function iniciarJogo(nome) {
+    document.getElementById("telaNome").style.display = "none";
+    document.getElementById("telaJogo").style.display = "block";
+    document.getElementById("nomeJogador").textContent = nome;
+}
+
+function finalizarJogo() {
+    const inicio = parseInt(localStorage.getItem("tempoInicio"));
+    const tempoFinal = ((Date.now() - inicio) / 1000).toFixed(2);
+
+    const nome = localStorage.getItem("nomeJogador");
+
+    const resultado = { nome: nome, tempo: Number(tempoFinal) };
+
+    let ranking = JSON.parse(localStorage.getItem("rankingJogadores")) || [];
+    ranking.push(resultado);
+
+    localStorage.setItem("rankingJogadores", JSON.stringify(ranking));
+
+    alert(`Parabéns, ${nome}! Jogo finalizado em ${tempoFinal}s`);
+
+    window.location.href = "ranking.html";
+}
+
+/* ============================
    CLASSE DO NÓ DA LISTA
    ============================ */
 
@@ -275,10 +321,17 @@ function verifyCode() {
         alert("✔ Código correto! Componente substituído.");
         robot.components.pop();
 
+        // Se acabou a pilha, remove o robô
         if (robot.components.isEmpty()) {
             alert("🤖 Robô consertado!");
             robotsList.removeById(robot.id);
             selectedRobotId = null;
+
+            // Se não houver mais robôs → finaliza o jogo
+            if (robotsList.size === 0) {
+                finalizarJogo();
+                return;
+            }
         }
 
     } else {
