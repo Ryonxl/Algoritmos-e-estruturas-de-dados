@@ -1,0 +1,72 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Oficina — Reparo de Robôs</title>
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+  <!-- Modal para seleção de jogador (obrigatório) -->
+  <div id="overlayNomeJogador" class="overlay">
+    <div class="modal">
+      <h2>Bem-vindo à Oficina</h2>
+
+      <label for="nomeJogador">Digite seu nome:</label>
+      <input type="text" id="nomeJogador" placeholder="Seu nome" />
+
+      <label for="selectJogador">Ou selecione um jogador existente:</label>
+      <select id="selectJogador">
+        <option value="">-- Selecione --</option>
+      </select>
+
+      <div class="modal-row">
+        <button id="btnIniciar">OK</button>
+      </div>
+      <p class="small">O nome é obrigatório e não pode repetir um nickname já usado no ranking.</p>
+    </div>
+  </div>
+
+  <!-- Modal de fim de partida -->
+  <div id="overlayGameOver" class="overlay" style="display:none;">
+    <div class="modal">
+      <h2 id="tituloGameOver">Fim de Partida</h2>
+      <p id="mensagemGameOver"></p>
+      <div class="modal-row">
+        <button id="btnTentarNovamente">Tentar Novamente</button>
+        <button id="btnNovoJogador">Novo Jogador</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="root">
+    <div id="left">
+      <canvas id="gameCanvas"></canvas>
+    </div>
+
+    <div id="right">
+      <h2>Oficina de Reparo</h2>
+      <div class="stat">Jogador: <span id="labelJogador">—</span></div>
+      <div class="stat">Robôs na fila: <span id="contadorFila">0</span>/<span id="maxFila">8</span></div>
+      <div class="stat">Consertados: <span id="contadorConsertados">0</span></div>
+      <div class="stat">Componentes trocados: <span id="contadorComponentes">0</span></div>
+      <div class="stat">Tempo (s): <span id="tempoJogo">0</span></div>
+
+      <label for="inputCodigo">Digite o código do componente (topo) e pressione ENTER:</label>
+      <input type="text" id="inputCodigo" autocomplete="off" />
+
+      <div class="row">
+        <button id="btnIniciarJogo" disabled>Iniciar Jogo</button>
+        <button id="btnReset">Resetar</button>
+      </div>
+
+      <div id="detalheRobo" class="small" style="margin-top:12px;">Nenhum robô selecionado</div>
+
+      <h3 style="margin-top:12px;">Ranking (local)</h3>
+      <div id="ranking"></div>
+    </div>
+  </div>
+
+  <script type="module" src="js/main.js"></script>
+</body>
+</html>
