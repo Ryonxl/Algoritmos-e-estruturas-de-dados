@@ -1,0 +1,79 @@
+/* ---------- ESTILO GERAL ---------- */
+body {
+    font-family: "Trebuchet MS", sans-serif;
+    background: linear-gradient(#1b1b2f, #162447);
+    color: #fff;
+    padding: 20px;
+}
+
+h1 {
+    text-align: center;
+    margin-bottom: 10px;
+}
+
+/* ---------- ÁREA DOS HERÓIS ---------- */
+#arena {
+    display: flex;
+    justify-content: center;
+    gap: 15px;
+    padding: 20px;
+    flex-wrap: wrap;
+}
+
+.hero {
+    width: 140px;
+    background: #1f4068;
+    border: 2px solid #e43f5a;
+    border-radius: 12px;
+    text-align: center;
+    padding: 10px;
+    transition: transform .3s;
+}
+
+.hero img {
+    width: 80px;
+    height: 80px;
+    border-radius: 10px;
+}
+
+.hero:hover {
+    transform: scale(1.05);
+}
+
+/* usado quando dois heróis estão duelando */
+.highlight {
+    border: 3px solid yellow !important;
+    transform: scale(1.12);
+}
+
+/* ---------- PODER ---------- */
+.power {
+    font-weight: bold;
+    color: #00ffea;
+}
+
+/* ---------- PAINEL DE LOGS ---------- */
+#log {
+    background: #0f0f1a;
+    height: 200px;
+    overflow-y: auto;
+    padding: 15px;
+    border-radius: 10px;
+    margin-top: 20px;
+    border: 1px solid #233;
+}
+
+/* ---------- BOTÃO ---------- */
+button {
+    margin-top: 20px;
+    padding: 12px 25px;
+    border: none;
+    border-radius: 8px;
+    background: #e43f5a;
+    color: white;
+    font-size: 18px;
+    cursor: pointer;
+}
+button:hover {
+    background: #ff6f7a;
+}
