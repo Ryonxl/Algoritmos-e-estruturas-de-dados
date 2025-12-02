@@ -1,7 +1,7 @@
 // =========================================================
 // BASE DE HERÓIS (com imagens da sua pasta img/)
 // =========================================================
-let heroes = [
+let heroesOriginais = [
     { nome: "Aragorn", poder: 78, img: "img/ARAGORN.jpg" },
     { nome: "Legolas", poder: 92, img: "img/Legolas.jpg" },
     { nome: "Gimli", poder: 65, img: "img/GIMLI.jpg" },
@@ -9,6 +9,9 @@ let heroes = [
     { nome: "Frodo", poder: 34, img: "img/FRODO.jpg" },
     { nome: "Boromir", poder: 70, img: "img/BOROMIR.jpg" }
 ];
+
+// cópia usada na ordenação (para permitir reset)
+let heroes = JSON.parse(JSON.stringify(heroesOriginais));
 
 
 // =========================================================
@@ -185,4 +188,16 @@ async function iniciarMergeSort() {
     heroes.forEach(h => log(`${h.nome} — Poder ${h.poder}`));
 
     mostrarHeroes();
+}
+
+
+
+// =========================================================
+// 🔁 RESETAR (botão RESET no HTML)
+// =========================================================
+function resetar() {
+    heroes = JSON.parse(JSON.stringify(heroesOriginais));
+    document.getElementById("log").innerHTML = "";
+    mostrarHeroes();
+    log("🔄 Sistema resetado! Heróis voltaram ao estado original.");
 }
