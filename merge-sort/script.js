@@ -1,203 +1,234 @@
-// =========================================================
-// BASE DE HERÓIS (com imagens da sua pasta img/)
-// =========================================================
-let heroesOriginais = [
-    { nome: "Aragorn", poder: 78, img: "img/ARAGORN.jpg" },
-    { nome: "Legolas", poder: 92, img: "img/Legolas.jpg" },
-    { nome: "Gimli", poder: 65, img: "img/GIMLI.jpg" },
-    { nome: "Gandalf", poder: 99, img: "img/GANDALF.jpg" },
-    { nome: "Frodo", poder: 34, img: "img/FRODO.jpg" },
-    { nome: "Boromir", poder: 70, img: "img/BOROMIR.jpg" }
-];
+// =======================================================================
+// 📌 CLASSE HEROI
+// Cada herói tem nome, poder e imagem
+// =======================================================================
+class Heroi {
+    constructor(nome, poder, img) {
+        this.nome = nome;
+        this.poder = poder;
+        this.img = img;
+    }
 
-// cópia usada na ordenação (para permitir reset)
-let heroes = JSON.parse(JSON.stringify(heroesOriginais));
-
-
-// =========================================================
-// FUNÇÃO: Exibe os heróis na arena
-// =========================================================
-function mostrarHeroes() {
-    const arena = document.getElementById("arena");
-    arena.innerHTML = "";
-
-    heroes.forEach(h => {
-        arena.innerHTML += `
-            <div class="hero">
-                <img src="${h.img}">
-                <h3>${h.nome}</h3>
-                <p>Poder: <span class="power">${h.poder}</span></p>
-            </div>
-        `;
-    });
+    // Cria uma cópia independente do herói
+    clone() {
+        return new Heroi(this.nome, this.poder, this.img);
+    }
 }
 
-mostrarHeroes();
+// =======================================================================
+// 📌 CLASSE ARENA (visualização)
+// =======================================================================
+class Arena {
+    constructor(divArena) {
+        this.divArena = divArena;
+    }
 
+    // Mostra todos os heróis no HTML
+    mostrar(herois) {
+        this.divArena.innerHTML = "";
+        herois.forEach(h => {
+            this.divArena.innerHTML += `
+                <div class="hero">
+                    <img src="${h.img}">
+                    <h3>${h.nome}</h3>
+                    <p>Poder: <span class="power">${h.poder}</span></p>
+                </div>
+            `;
+        });
+    }
 
-// =========================================================
-// LOG: escreve mensagens no painel lateral
-// =========================================================
-function log(msg) {
-    const area = document.getElementById("log");
-    area.innerHTML += msg + "<br>";
-    area.scrollTop = area.scrollHeight;
+    // Destaca visualmente dois heróis que estão duelando
+    async destacar(idxA, idxB) {
+        const cards = document.querySelectorAll(".hero");
+        if (!cards[idxA] || !cards[idxB]) return;
+
+        // Adiciona efeito visual
+        cards[idxA].classList.add("highlight");
+        cards[idxB].classList.add("highlight");
+
+        // Espera para mostrar o destaque
+        await esperar(400);
+
+        // Remove efeito
+        cards[idxA].classList.remove("highlight");
+        cards[idxB].classList.remove("highlight");
+    }
 }
 
+// =======================================================================
+// 📌 CLASSE LOGGER (mensagens)
+// =======================================================================
+class Logger {
+    constructor(divLog) {
+        this.divLog = divLog;
+    }
 
-// =========================================================
-// Destaque visual de duelo entre dois heróis
-// =========================================================
-async function destacar(i, j) {
-    const cards = document.querySelectorAll(".hero");
+    escrever(msg) {
+        this.divLog.innerHTML += msg + "<br>";
+        this.divLog.scrollTop = this.divLog.scrollHeight; // scroll automático
+    }
 
-    cards[i].classList.add("highlight");
-    cards[j].classList.add("highlight");
-
-    await esperar(500);
-
-    cards[i].classList.remove("highlight");
-    cards[j].classList.remove("highlight");
+    limpar() {
+        this.divLog.innerHTML = "";
+    }
 }
 
+// =======================================================================
+// 📌 CLASSE MERGE SORT RPG
+// Lógica completa do Merge Sort com animação e logs
+// =======================================================================
+class MergeSortRPG {
+    constructor(arena, logger) {
+        this.arena = arena;
+        this.logger = logger;
+    }
 
-// utilitário de espera para animação
+    // ----------------------------------------------------
+    // 🔹 Função recursiva principal do Merge Sort
+    // ----------------------------------------------------
+    async ordenar(lista, startIndex = 0) {
+        // Caso base: se só houver 1 herói, já está ordenado
+        if (lista.length <= 1) return lista;
+
+        // Divide o array em duas metades
+        const meio = Math.floor(lista.length / 2);
+
+        // Chamada recursiva na metade esquerda
+        const metadeEsq = await this.ordenar(lista.slice(0, meio), startIndex);
+
+        // Chamada recursiva na metade direita
+        const metadeDir = await this.ordenar(lista.slice(meio), startIndex + meio);
+
+        // Mescla as duas metades e retorna o array ordenado
+        return await this.mesclar(metadeEsq, metadeDir, startIndex);
+    }
+
+    // ----------------------------------------------------
+    // 🔹 Mescla duas sublistas (merge)
+    // Compara heróis e anima cada duelo
+    // ----------------------------------------------------
+    async mesclar(left, right, start) {
+        let resultado = [];
+        let i = 0, j = 0;
+
+        // Enquanto houver elementos nas duas sublistas
+        while (i < left.length && j < right.length) {
+            // Índices reais no array global
+            let idxLeft  = start + i;
+            let idxRight = start + left.length + j;
+
+            // Destaca os dois heróis duelando
+            await this.arena.destacar(idxLeft, idxRight);
+
+            // Escreve log do duelo
+            this.logger.escrever(
+                `⚔️ ${left[i].nome} (${left[i].poder}) desafia ${right[j].nome} (${right[j].poder})!`
+            );
+
+            // Compara poderes e escolhe o vencedor
+            if (left[i].poder >= right[j].poder) {
+                this.logger.escrever(`🏆 Vencedor: <b>${left[i].nome}</b>`);
+                resultado.push(left[i]); // adiciona vencedor na lista resultante
+                i++;
+            } else {
+                this.logger.escrever(`🏆 Vencedor: <b>${right[j].nome}</b>`);
+                resultado.push(right[j]);
+                j++;
+            }
+
+            // Atualiza o estado global e a visualização
+            atualizarEstadoGlobal(start, resultado);
+
+            // Pequena pausa para animação
+            await esperar(300);
+        }
+
+        // Copia qualquer restante da metade esquerda
+        while (i < left.length) {
+            resultado.push(left[i]);
+            atualizarEstadoGlobal(start, resultado);
+            i++;
+            await esperar(150);
+        }
+
+        // Copia qualquer restante da metade direita
+        while (j < right.length) {
+            resultado.push(right[j]);
+            atualizarEstadoGlobal(start, resultado);
+            j++;
+            await esperar(150);
+        }
+
+        // Retorna a lista mesclada e parcialmente ordenada
+        return resultado;
+    }
+}
+
+// =======================================================================
+// Atualiza array global sem duplicar cards
+// =======================================================================
+function atualizarEstadoGlobal(start, resultadoParcial) {
+    let copia = [...heroes];
+    for (let k = 0; k < resultadoParcial.length; k++) {
+        copia[start + k] = resultadoParcial[k];
+    }
+    heroes = copia;
+    arena.mostrar(heroes); // atualiza visual
+}
+
+// =======================================================================
+// Função auxiliar de espera
+// =======================================================================
 function esperar(ms) {
     return new Promise(res => setTimeout(res, ms));
 }
 
+// =======================================================================
+// Dados iniciais
+// =======================================================================
+let heroesOriginais = [
+    new Heroi("Aragorn", 78, "img/ARAGORN.jpg"),
+    new Heroi("Legolas", 92, "img/LEGOLAS.jpg"),
+    new Heroi("Gimli", 65, "img/GIMLI.jpg"),
+    new Heroi("Gandalf", 99, "img/GANDALF.jpg"),
+    new Heroi("Frodo", 34, "img/FRODO.jpg"),
+    new Heroi("Boromir", 70, "img/BOROMIR.jpg")
+];
 
+// Cópia independente mantendo Heroi real
+let heroes = heroesOriginais.map(h => h.clone());
 
-// =========================================================
-// ▶️ MERGE SORT VERSÃO RPG (Explicado Passo a Passo)
-// =========================================================
-//
-// O Merge Sort funciona em 2 fases:
-//
-// 1. DIVIDIR o array em partes menores (recursão)
-// 2. MESCLAR (merge) comparando os elementos e ordenando
-//
-// Aqui, a comparação virou “batalhas” entre heróis.
-// O mais poderoso sempre vence o duelo e vai para a lista final.
-//
-// =========================================================
+// =======================================================================
+// Instanciando objetos principais
+// =======================================================================
+const arena = new Arena(document.getElementById("arena"));
+const logger = new Logger(document.getElementById("log"));
+const sorter = new MergeSortRPG(arena, logger);
 
-async function mergeSortRPG(arr, start) {
+// Desenha lista inicial
+arena.mostrar(heroes);
 
-    // CASO BASE: listas com 1 herói já estão “ordenadas”
-    if (arr.length <= 1) return arr;
-
-    // Divide ao meio
-    const meio = Math.floor(arr.length / 2);
-
-    // Chama mergeSort recursivamente para cada metade
-    // (enquanto isso, a tela mostra os duelos)
-    const esquerda = await mergeSortRPG(arr.slice(0, meio), start);
-    const direita  = await mergeSortRPG(arr.slice(meio), start + meio);
-
-    // Após as metades estarem ordenadas → juntar as duas
-    return await mesclarRPG(esquerda, direita, start);
-}
-
-
-
-// =========================================================
-// FUNÇÃO PRINCIPAL DO MERGE (A MAIS IMPORTANTE)
-//
-// Aqui acontece a “fusão”: dois grupos ordenados viram um maior.
-// Na prática, é onde o Merge Sort *realmente ordena*.
-//
-// A cada comparação, os heróis “duelam”.
-//
-// =========================================================
-
-async function mesclarRPG(left, right, start) {
-
-    let resultado = [];
-    let i = 0, j = 0;
-
-    // Enquanto ainda existem heróis nas duas metades…
-    while (i < left.length && j < right.length) {
-
-        // Mostra o duelo visualmente
-        await destacar(start + i, start + left.length + j);
-
-        log(`⚔️ ${left[i].nome} (${left[i].poder}) desafia ${right[j].nome} (${right[j].poder})!`);
-
-        // Compara quem é mais forte
-        if (left[i].poder < right[j].poder) {
-
-            // DIREITA vence
-            log(`🏆 Vencedor: <b>${right[j].nome}</b>`);
-            resultado.push(right[j]);
-            j++;
-
-        } else {
-
-            // ESQUERDA vence
-            log(`🏆 Vencedor: <b>${left[i].nome}</b>`);
-            resultado.push(left[i]);
-            i++;
-        }
-
-        // Atualiza visualmente a fusão parcial
-        atualizarHeroisMesclados(start, resultado);
-        await esperar(400);
-    }
-
-    // COPIA RESTANTES (se alguma lista acabar primeiro)
-    while (i < left.length) {
-        resultado.push(left[i]);
-        atualizarHeroisMesclados(start, resultado);
-        i++;
-        await esperar(200);
-    }
-
-    while (j < right.length) {
-        resultado.push(right[j]);
-        atualizarHeroisMesclados(start, resultado);
-        j++;
-        await esperar(200);
-    }
-
-    return resultado;
-}
-
-
-
-// =========================================================
-// Atualiza visual da fusão na arena
-// =========================================================
-function atualizarHeroisMesclados(start, tempList) {
-    heroes.splice(start, tempList.length, ...tempList);
-    mostrarHeroes();
-}
-
-
-
-// =========================================================
-// INICIAR MERGE SORT
-// =========================================================
+// =======================================================================
+// Controles (botões)
+// =======================================================================
 async function iniciarMergeSort() {
-    document.getElementById("log").innerHTML = "";
-    log("🔥 Iniciando torneio entre heróis...");
+    logger.limpar();
+    logger.escrever("🔥 Iniciando torneio...");
 
-    heroes = await mergeSortRPG(heroes, 0);
+    // Ordena os heróis com merge sort animado
+    heroes = await sorter.ordenar(heroes, 0);
 
-    log("<br>🏅 <b>Ranking Final (Mais forte primeiro)</b>");
-    heroes.forEach(h => log(`${h.nome} — Poder ${h.poder}`));
+    // Exibe ranking final
+    logger.escrever("<br>🏅 <b>Ranking Final (Mais forte primeiro)</b>");
+    heroes.forEach(h => logger.escrever(`${h.nome} — Poder ${h.poder}`));
 
-    mostrarHeroes();
+    arena.mostrar(heroes);
 }
 
-
-
-// =========================================================
-// 🔁 RESETAR (botão RESET no HTML)
-// =========================================================
+// Reseta para estado inicial
 function resetar() {
-    heroes = JSON.parse(JSON.stringify(heroesOriginais));
-    document.getElementById("log").innerHTML = "";
-    mostrarHeroes();
-    log("🔄 Sistema resetado! Heróis voltaram ao estado original.");
+    heroes = heroesOriginais.map(h => h.clone());
+    arena.mostrar(heroes);
+    logger.limpar();
+    logger.escrever("🔄 Sistema resetado!");
 }
