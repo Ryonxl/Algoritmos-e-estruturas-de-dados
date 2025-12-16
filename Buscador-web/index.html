@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <title>Buscador Web com Trie</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <h1>Buscador Web</h1>
+  <p>Sistema de busca baseado em árvore (Trie)</p>
+
+  <section class="card">
+    <h2>Cadastrar Página / Conteúdo</h2>
+
+    <label>Nome da página:</label>
+    <input type="text" id="pageInput" placeholder="Ex: ONG Esperança">
+
+    <label>Palavras-chave (separadas por vírgula):</label>
+    <input type="text" id="keywordsInput" placeholder="doação, educação, saúde">
+
+    <button onclick="addPage()">Cadastrar</button>
+  </section>
+
+  <section class="card">
+    <h2>Buscar Conteúdo</h2>
+
+    <label>Palavra-chave:</label>
+    <input type="text" id="searchInput" placeholder="Ex: doação">
+
+    <button onclick="search()">Buscar</button>
+
+    <ul id="results"></ul>
+  </section>
+
+  <script src="script.js"></script>
+</body>
+</html>
