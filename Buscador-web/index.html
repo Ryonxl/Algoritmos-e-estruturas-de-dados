@@ -2,7 +2,7 @@
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8">
-  <title>Buscador com Trie</title>
+  <title>Buscador Web com Trie</title>
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -10,16 +10,17 @@
 <header class="hero">
   <div class="hero-content">
     <h1>🔎 Buscador Web</h1>
-    <p>Buscador Web com infraestrutura própria baseada em Árvores Trie</p>
+    <p>Infraestrutura própria de indexação baseada em Árvores Trie</p>
     <span class="badge">Algoritmos e Estruturas de Dados • IFPE</span>
   </div>
 </header>
 
 <main class="container">
 
+  <!-- CADASTRO / REMOÇÃO -->
   <section class="card highlight">
-    <h2>📄 Cadastro de Conteúdo</h2>
-    <p class="subtitle">Indexação manual de páginas e palavras-chave</p>
+    <h2>📄 Cadastro / Remoção de Conteúdo</h2>
+    <p class="subtitle">Indexação manual usando árvore Trie</p>
 
     <div class="field">
       <label>Página</label>
@@ -32,11 +33,13 @@
     </div>
 
     <button onclick="engine.addPage()">➕ Indexar Página</button>
+    <button class="danger" onclick="engine.removePage()">🗑️ Remover Página</button>
   </section>
 
+  <!-- BUSCA -->
   <section class="card">
     <h2>🔍 Busca</h2>
-    <p class="subtitle">Consulta por uma ou múltiplas palavras</p>
+    <p class="subtitle">Busca simples ou múltipla com relevância</p>
 
     <div class="field">
       <label>Termo(s) de busca</label>
@@ -44,13 +47,13 @@
     </div>
 
     <button onclick="engine.search()">🔎 Buscar</button>
-
     <ul id="results" class="results"></ul>
   </section>
 
+  <!-- VISUALIZAÇÃO DA ÁRVORE -->
   <section class="card tree">
-    <h2>🌳 Infraestrutura de Indexação</h2>
-    <p class="subtitle">Visualização textual da Árvore Trie</p>
+    <h2>🌳 Estrutura da Árvore Trie</h2>
+    <p class="subtitle">Visualização textual da infraestrutura</p>
     <pre id="treeView"></pre>
   </section>
 

@@ -1,4 +1,31 @@
 /* =========================================================
+   FUNÇÃO AUXILIAR
+   Normaliza palavras:
+   - Converte para minúsculas
+   - Remove acentos
+   - Remove espaços extras
+   ========================================================= */
+function normalizeWord(word) {
+  return word
+    .toLowerCase()
+    .normalize("NFD")                 // separa letras de acentos
+    .replace(/[\u0300-\u036f]/g, "") // remove acentos
+    .trim();
+}
+
+/* =========================================================
+   FUNÇÃO AUXILIAR
+   Normaliza páginas/conteúdos:
+   - Converte para minúsculas
+   - Remove espaços extras
+   ========================================================= */
+function normalizePage(page) {
+  return page
+    .toLowerCase()
+    .trim();
+}
+
+/* =========================================================
    CLASSE TrieNode
    Representa um NÓ da árvore Trie (árvore de prefixos)
    Cada nó guarda:
@@ -11,225 +38,254 @@ class TrieNode {
     // children é um objeto onde:
     // a chave = caractere
     // o valor = outro TrieNode
-    // Exemplo: { d: TrieNode, s: TrieNode }
     this.children = {};
 
     // Indica se este nó representa o FINAL de uma palavra válida
-    // Exemplo: "doar" termina neste nó
     this.isEnd = false;
 
-    // Lista de páginas/conteúdos associados a essa palavra-chave
-    // Exemplo: ["ONG Esperança", "Projeto Educação Viva"]
+    // Lista de páginas associadas à palavra-chave
     this.pages = [];
   }
 }
 
 /* =========================================================
    CLASSE Trie
-   Representa a ÁRVORE de indexação propriamente dita
-   É a estrutura central do motor de busca
+   Representa a ÁRVORE de indexação
    ========================================================= */
 class Trie {
   constructor() {
-    // root é a raiz da árvore
-    // Ela não representa um caractere, apenas o ponto inicial
+    // Nó raiz da árvore
     this.root = new TrieNode();
   }
 
   /* =====================================================
      INSERÇÃO DE UMA PALAVRA NA ÁRVORE
-     A palavra é inserida caractere por caractere
      ===================================================== */
   insert(word, page) {
-    // Começamos sempre pela raiz
     let node = this.root;
 
-    // Percorre cada caractere da palavra
     for (let char of word) {
-      // Se ainda não existe um nó para esse caractere,
-      // criamos um novo nó
+      // Se o caractere ainda não existir, cria o nó
       if (!node.children[char]) {
         node.children[char] = new TrieNode();
       }
-
-      // Avança para o próximo nó (nível da árvore)
       node = node.children[char];
     }
 
-    // Após inserir todos os caracteres,
-    // marcamos que aqui termina uma palavra válida
+    // Marca o fim da palavra
     node.isEnd = true;
 
-    // Associa a página à palavra-chave,
-    // evitando duplicação
+    // Evita páginas duplicadas
     if (!node.pages.includes(page)) {
       node.pages.push(page);
     }
   }
 
   /* =====================================================
-     BUSCA DE UMA ÚNICA PALAVRA NA ÁRVORE
-     Retorna as páginas associadas
+     BUSCA DE UMA ÚNICA PALAVRA
      ===================================================== */
   searchWord(word) {
-    // Começa pela raiz
     let node = this.root;
 
-    // Percorre a árvore seguindo os caracteres da palavra
     for (let char of word) {
-      // Se em algum ponto o caractere não existir,
-      // a palavra não está indexada
+      // Se o caminho não existir, a palavra não está indexada
       if (!node.children[char]) return [];
-
       node = node.children[char];
     }
 
-    // Se o nó final for realmente fim de palavra,
-    // retornamos as páginas associadas
+    // Retorna as páginas apenas se for fim de palavra
     return node.isEnd ? node.pages : [];
   }
 
   /* =====================================================
      BUSCA COM MÚLTIPLAS PALAVRAS
-     Retorna apenas páginas que possuem TODAS as palavras
-     (busca do tipo AND)
+     COM CONTADOR DE RELEVÂNCIA
      ===================================================== */
   searchMultiple(words) {
-    let result = null;
+    const relevanceMap = {};
 
     words.forEach(word => {
-      // Busca páginas para cada palavra individualmente
       const pages = this.searchWord(word);
 
-      // Primeira palavra define o conjunto inicial
-      // As demais fazem interseção
-      result = result === null
-        ? pages
-        : result.filter(p => pages.includes(p));
+      pages.forEach(page => {
+        // Incrementa a relevância da página
+        relevanceMap[page] = (relevanceMap[page] || 0) + 1;
+      });
     });
 
-    // Se nada foi encontrado, retorna array vazio
-    return result || [];
+    // Ordena da maior relevância para a menor
+    return Object.entries(relevanceMap)
+      .sort((a, b) => b[1] - a[1])
+      .map(([page, score]) => ({ page, score }));
+  }
+
+  /* =====================================================
+     REMOÇÃO DE UMA PÁGINA ASSOCIADA A UMA PALAVRA
+     ===================================================== */
+  remove(word, page) {
+    const removeRecursive = (node, word, depth) => {
+      if (!node) return false;
+
+      // Chegou ao final da palavra
+      if (depth === word.length) {
+        if (node.isEnd) {
+          // Remove a página associada
+          node.pages = node.pages.filter(p => p !== page);
+
+          // Se não houver mais páginas, remove a marcação de fim
+          if (node.pages.length === 0) {
+            node.isEnd = false;
+          }
+        }
+
+        // Indica se o nó pode ser removido
+        return Object.keys(node.children).length === 0 && !node.isEnd;
+      }
+
+      const char = word[depth];
+
+      const shouldDeleteChild = removeRecursive(
+        node.children[char],
+        word,
+        depth + 1
+      );
+
+      // Remove o filho se não for mais necessário
+      if (shouldDeleteChild) {
+        delete node.children[char];
+      }
+
+      return Object.keys(node.children).length === 0 && !node.isEnd;
+    };
+
+    // Inicia a remoção a partir da raiz
+    removeRecursive(this.root, word, 0);
   }
 
   /* =====================================================
      IMPRESSÃO DA ÁRVORE (VISUALIZAÇÃO)
-     Função recursiva que percorre toda a Trie
      ===================================================== */
   print(node = this.root, prefix = "", output = []) {
-    // Se este nó marca o fim de uma palavra,
-    // adicionamos ao resultado
     if (node.isEnd) {
       output.push(prefix + " → " + node.pages.join(", "));
     }
 
-    // Percorre recursivamente todos os filhos
     for (let char in node.children) {
       this.print(node.children[char], prefix + char, output);
     }
 
-    // Retorna todas as palavras encontradas
     return output;
   }
 }
 
 /* =========================================================
    CLASSE SearchEngine
-   Controla a aplicação (interface + lógica)
+   Controla a aplicação
    ========================================================= */
 class SearchEngine {
   constructor() {
-    // Cria a árvore Trie
     this.trie = new Trie();
-
-    // Carrega dados salvos (se existirem)
     this.load();
-
-    // Renderiza a árvore na interface
     this.renderTree();
   }
 
   /* =====================================================
-     CADASTRO DE PÁGINAS E PALAVRAS-CHAVE
+     CADASTRO DE PÁGINAS
      ===================================================== */
   addPage() {
-    const page = pageInput.value.trim();
+    const page = normalizePage(pageInput.value);
     const keywordsText = keywordsInput.value.trim();
 
-    // Remove estilos de erro anteriores
     pageInput.classList.remove("error");
     keywordsInput.classList.remove("error");
 
-    // Validação: todos os campos são obrigatórios
     if (!page || !keywordsText) {
       if (!page) pageInput.classList.add("error");
       if (!keywordsText) keywordsInput.classList.add("error");
-      alert("Preencha todos os campos antes de cadastrar.");
+      alert("Preencha todos os campos.");
       return;
     }
 
-    // Divide as palavras-chave e insere na Trie
-    keywordsText.split(",").forEach(k => {
-      const word = k.trim().toLowerCase();
+    // Remove palavras repetidas antes de inserir
+    const uniqueWords = [...new Set(
+      keywordsText.split(",").map(k => normalizeWord(k))
+    )];
+
+    uniqueWords.forEach(word => {
       if (word) this.trie.insert(word, page);
     });
 
-    // Salva os dados e atualiza a visualização
     this.save();
     this.renderTree();
 
     alert("Página cadastrada com sucesso!");
-
-    // Limpa os campos
     pageInput.value = "";
     keywordsInput.value = "";
+  }
+
+  /* =====================================================
+     REMOÇÃO DE UMA PÁGINA DO ÍNDICE
+     ===================================================== */
+  removePage() {
+    const page = normalizePage(pageInput.value);
+    const keywordsText = keywordsInput.value.trim();
+
+    if (!page || !keywordsText) {
+      alert("Informe a página e as palavras para remover.");
+      return;
+    }
+
+    keywordsText.split(",").forEach(k => {
+      const word = normalizeWord(k);
+      if (word) this.trie.remove(word, page);
+    });
+
+    this.save();
+    this.renderTree();
+
+    alert("Página removida com sucesso!");
   }
 
   /* =====================================================
      BUSCA DE CONTEÚDOS
      ===================================================== */
   search() {
-    // Divide o texto da busca em palavras
     const words = searchInput.value
-      .toLowerCase()
       .split(" ")
+      .map(w => normalizeWord(w))
       .filter(w => w);
 
-    // Realiza a busca na Trie
-    const results = this.trie.searchMultiple(words);
+    if (words.length === 0) {
+      alert("Digite ao menos uma palavra para buscar.");
+      return;
+    }
 
-    // Limpa resultados anteriores
+    const results = this.trie.searchMultiple(words);
     resultsUl.innerHTML = "";
 
-    // Caso não encontre nada
     if (results.length === 0) {
       resultsUl.innerHTML = "<li>Nenhum resultado encontrado</li>";
       return;
     }
 
-    // Exibe os resultados encontrados
-    results.forEach(page => {
+    results.forEach(item => {
       const li = document.createElement("li");
-      li.textContent = page;
+      li.textContent = `${item.page} (relevância: ${item.score})`;
       resultsUl.appendChild(li);
     });
   }
 
   /* =====================================================
-     SALVA A ÁRVORE NO LOCALSTORAGE
+     PERSISTÊNCIA
      ===================================================== */
   save() {
     localStorage.setItem("trieData", JSON.stringify(this.trie));
   }
 
-  /* =====================================================
-     RECONSTRÓI A ÁRVORE A PARTIR DO LOCALSTORAGE
-     ===================================================== */
   load() {
     const data = localStorage.getItem("trieData");
     if (!data) return;
 
-    // Função recursiva para reconstruir cada nó
     const rebuild = (nodeData) => {
       const node = new TrieNode();
       node.isEnd = nodeData.isEnd;
@@ -246,16 +302,15 @@ class SearchEngine {
   }
 
   /* =====================================================
-     MOSTRA A ÁRVORE NA INTERFACE
+     VISUALIZAÇÃO DA ÁRVORE
      ===================================================== */
   renderTree() {
-    const tree = this.trie.print().join("\n");
-    treeView.textContent = tree || "Árvore vazia";
+    treeView.textContent = this.trie.print().join("\n") || "Árvore vazia";
   }
 }
 
 /* =========================================================
-   REFERÊNCIAS AOS ELEMENTOS DO HTML
+   ELEMENTOS DA INTERFACE
    ========================================================= */
 const pageInput = document.getElementById("pageInput");
 const keywordsInput = document.getElementById("keywordsInput");
@@ -264,6 +319,6 @@ const resultsUl = document.getElementById("results");
 const treeView = document.getElementById("treeView");
 
 /* =========================================================
-   INICIALIZAÇÃO DO SISTEMA
+   INICIALIZAÇÃO
    ========================================================= */
 const engine = new SearchEngine();
