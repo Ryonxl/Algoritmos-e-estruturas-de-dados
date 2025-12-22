@@ -2,37 +2,64 @@
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8">
-  <title>Buscador Web com Trie</title>
+  <title>Buscador com Trie</title>
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
-  <h1>Buscador Web</h1>
-  <p>Sistema de busca baseado em árvore (Trie)</p>
+<header class="hero">
+  <div class="hero-content">
+    <h1>🔎 Buscador Web</h1>
+    <p>Buscador Web com infraestrutura própria baseada em Árvores Trie</p>
+    <span class="badge">Algoritmos e Estruturas de Dados • IFPE</span>
+  </div>
+</header>
 
-  <section class="card">
-    <h2>Cadastrar Página / Conteúdo</h2>
+<main class="container">
 
-    <label>Nome da página:</label>
-    <input type="text" id="pageInput" placeholder="Ex: ONG Esperança">
+  <section class="card highlight">
+    <h2>📄 Cadastro de Conteúdo</h2>
+    <p class="subtitle">Indexação manual de páginas e palavras-chave</p>
 
-    <label>Palavras-chave (separadas por vírgula):</label>
-    <input type="text" id="keywordsInput" placeholder="doação, educação, saúde">
+    <div class="field">
+      <label>Página</label>
+      <input id="pageInput" placeholder="Ex: ONG Esperança">
+    </div>
 
-    <button onclick="addPage()">Cadastrar</button>
+    <div class="field">
+      <label>Palavras-chave</label>
+      <input id="keywordsInput" placeholder="doação, educação, saúde">
+    </div>
+
+    <button onclick="engine.addPage()">➕ Indexar Página</button>
   </section>
 
   <section class="card">
-    <h2>Buscar Conteúdo</h2>
+    <h2>🔍 Busca</h2>
+    <p class="subtitle">Consulta por uma ou múltiplas palavras</p>
 
-    <label>Palavra-chave:</label>
-    <input type="text" id="searchInput" placeholder="Ex: doação">
+    <div class="field">
+      <label>Termo(s) de busca</label>
+      <input id="searchInput" placeholder="Ex: doação educação">
+    </div>
 
-    <button onclick="search()">Buscar</button>
+    <button onclick="engine.search()">🔎 Buscar</button>
 
-    <ul id="results"></ul>
+    <ul id="results" class="results"></ul>
   </section>
 
-  <script src="script.js"></script>
+  <section class="card tree">
+    <h2>🌳 Infraestrutura de Indexação</h2>
+    <p class="subtitle">Visualização textual da Árvore Trie</p>
+    <pre id="treeView"></pre>
+  </section>
+
+</main>
+
+<footer>
+  <p>Projeto acadêmico • Implementação própria de estrutura de dados</p>
+</footer>
+
+<script src="script.js"></script>
 </body>
 </html>
