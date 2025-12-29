@@ -133,7 +133,7 @@ class Trie {
     Utiliza recursão para limpeza de nós.
   */
   remove(word, page) {
-    const removeRecursive = (node, depth) => {
+    const removeRecursive = (node, word, depth) => {
       if (!node) return false;
 
       if (depth === word.length) {
@@ -144,14 +144,14 @@ class Trie {
 
       const char = word[depth];
 
-      if (removeRecursive(node.children[char], depth + 1)) {
+      if (removeRecursive(node.children[char], word, depth + 1)) {
         delete node.children[char];
       }
 
       return Object.keys(node.children).length === 0 && !node.isEnd;
     };
 
-    removeRecursive(this.root, 0);
+    removeRecursive(this.root, word, 0);
   }
 
   /* ================= VISUALIZAÇÃO ================= */
@@ -207,8 +207,14 @@ class SearchEngine {
 
     this.pagesData[page] = description;
 
-    [...new Set(keywords.split(",").map(normalizeWord))]
-      .forEach(word => word && this.trie.insert(word, page));
+    [...new Set(
+      keywords
+        .split(",")
+        .flatMap(k => k.split(" "))
+        .map(normalizeWord)
+        .filter(Boolean)
+    )]
+      .forEach(word => this.trie.insert(word, page));
 
     this.save();
     this.renderTree();
