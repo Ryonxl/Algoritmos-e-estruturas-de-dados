@@ -53,13 +53,14 @@ body {
    LAYOUT
    =============================== */
 .container {
-  max-width: 1200px;
-  margin: -40px auto 0;
-  padding: 20px;
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
-  gap: 25px;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 24px;
+  max-width: 1400px;
+  margin: auto;
+  padding: 40px 20px;
 }
+
 
 /* ===============================
    CARD
@@ -67,7 +68,7 @@ body {
 .card {
   background: var(--card);
   border-radius: 18px;
-  padding: 25px;
+  padding: 32px;
   box-shadow: 0 15px 40px rgba(0,0,0,0.08);
 
   /* Transição suave */
@@ -83,7 +84,7 @@ body {
    EFEITO HOVER NO CARD
    =============================== */
 .card:hover {
-  transform: scale(1.05) translateY(-6px);
+  transform: translateY(-8px);
   box-shadow: 0 22px 45px rgba(0,0,0,0.18);
 }
 

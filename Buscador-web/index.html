@@ -1,68 +1,93 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
+
 <head>
   <meta charset="UTF-8">
   <title>Buscador Web com Trie</title>
   <link rel="stylesheet" href="style.css">
 </head>
+
 <body>
 
-<header class="hero">
-  <div class="hero-content">
-    <h1>🔎 Buscador Web</h1>
-    <p>Infraestrutura própria de indexação baseada em Árvores Trie</p>
-    <span class="badge">Algoritmos e Estruturas de Dados • IFPE</span>
-  </div>
-</header>
-
-<main class="container">
-
-  <!-- CADASTRO / REMOÇÃO -->
-  <section class="card highlight">
-    <h2>📄 Cadastro / Remoção de Conteúdo</h2>
-    <p class="subtitle">Indexação manual usando árvore Trie</p>
-
-    <div class="field">
-      <label>Página</label>
-      <input id="pageInput" placeholder="Ex: ONG Esperança">
+  <header class="hero">
+    <div class="hero-content">
+      <h1>🔎 Buscador Web</h1>
+      <p>Infraestrutura própria de indexação baseada em Árvores Trie</p>
+      <span class="badge">Algoritmos e Estruturas de Dados • IFPE</span>
     </div>
+  </header>
 
-    <div class="field">
-      <label>Palavras-chave</label>
-      <input id="keywordsInput" placeholder="doação, educação, saúde">
-    </div>
+  <main class="container">
 
-    <button onclick="engine.addPage()">➕ Indexar Página</button>
-    <button class="danger" onclick="engine.removePage()">🗑️ Remover Página</button>
-  </section>
+    <!-- CADASTRO -->
+    <section class="card highlight">
+      <h2>📄 Cadastro de Conteúdo</h2>
+      <p class="subtitle">Indexação manual usando árvore Trie</p>
 
-  <!-- BUSCA -->
-  <section class="card">
-    <h2>🔍 Busca</h2>
-    <p class="subtitle">Busca simples ou múltipla com relevância</p>
+      <div class="field">
+        <label>Página</label>
+        <input id="pageAddInput" placeholder="Ex: ONG Esperança">
+      </div>
 
-    <div class="field">
-      <label>Termo(s) de busca</label>
-      <input id="searchInput" placeholder="Ex: doação educação">
-    </div>
+      <div class="field">
+        <label>Conteúdo da página</label>
+        <input id="descriptionAddInput" placeholder="Descrição resumida do conteúdo">
+      </div>
 
-    <button onclick="engine.search()">🔎 Buscar</button>
-    <ul id="results" class="results"></ul>
-  </section>
+      <div class="field">
+        <label>Palavras-chave</label>
+        <input id="keywordsAddInput" placeholder="doação, educação, saúde">
+      </div>
 
-  <!-- VISUALIZAÇÃO DA ÁRVORE -->
-  <section class="card tree">
-    <h2>🌳 Estrutura da Árvore Trie</h2>
-    <p class="subtitle">Visualização textual da infraestrutura</p>
-    <pre id="treeView"></pre>
-  </section>
+      <button onclick="engine.addPage()">➕ Indexar Página</button>
+    </section>
+    
+    <!-- BUSCA -->
+    <section class="card">
+      <h2>🔍 Busca</h2>
+      <p class="subtitle">Busca simples ou múltipla com relevância</p>
 
-</main>
+      <div class="field">
+        <label>Termo(s) de busca</label>
+        <input id="searchInput" placeholder="Ex: doação educação">
+      </div>
 
-<footer>
-  <p>Projeto acadêmico • Implementação própria de estrutura de dados</p>
-</footer>
+      <button onclick="engine.search()">🔎 Buscar</button>
+      <ul id="results" class="results"></ul>
+    </section>
 
-<script src="script.js"></script>
+    <!-- REMOÇÃO -->
+    <section class="card danger-card">
+      <h2>🗑️ Remoção de Conteúdo</h2>
+      <p class="subtitle">Remove páginas e palavras da árvore Trie</p>
+
+      <div class="field">
+        <label>Página</label>
+        <input id="pageRemoveInput" placeholder="Ex: ONG Esperança">
+      </div>
+
+      <div class="field">
+        <label>Palavras-chave</label>
+        <input id="keywordsRemoveInput" placeholder="doação, educação">
+      </div>
+
+      <button class="danger" onclick="engine.removePage()">Remover Página</button>
+    </section>
+
+    <!-- VISUALIZAÇÃO DA ÁRVORE -->
+    <section class="card tree">
+      <h2>🌳 Estrutura da Árvore Trie</h2>
+      <p class="subtitle">Visualização textual da infraestrutura</p>
+      <pre id="treeView"></pre>
+    </section>
+
+  </main>
+
+  <footer>
+    <p>Projeto acadêmico • Implementação própria de estrutura de dados</p>
+  </footer>
+
+  <script src="script.js"></script>
 </body>
+
 </html>
