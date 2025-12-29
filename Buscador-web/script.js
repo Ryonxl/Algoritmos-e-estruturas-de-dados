@@ -237,8 +237,11 @@ class SearchEngine {
       return;
     }
 
-    keywords.split(",")
+    keywords
+      .split(",")
+      .flatMap(k => k.split(" "))
       .map(normalizeWord)
+      .filter(Boolean)
       .forEach(word => this.trie.remove(word, page));
 
     delete this.pagesData[page];
