@@ -44,9 +44,9 @@ function normalizePage(page) {
 */
 class TrieNode {
   constructor() {
-    this.children = {}; // ponteiros para outros nós
-    this.isEnd = false; // final de palavra
-    this.pages = [];    // páginas associadas
+    this.children = {};
+    this.isEnd = false;
+    this.pages = [];
   }
 }
 
@@ -66,14 +66,11 @@ class TrieNode {
 */
 class Trie {
   constructor() {
-    this.root = new TrieNode(); // nó raiz vazio
+    this.root = new TrieNode();
   }
 
   /* ================= INSERÇÃO ================= */
 
-  /*
-    Insere palavra-chave associada a uma página.
-  */
   insert(word, page) {
     let node = this.root;
 
@@ -91,11 +88,8 @@ class Trie {
     }
   }
 
-  /* ================= BUSCA SIMPLES ================= */
+  /* ================= BUSCA ================= */
 
-  /*
-    Busca páginas associadas a uma palavra.
-  */
   searchWord(word) {
     let node = this.root;
 
@@ -107,11 +101,6 @@ class Trie {
     return node.isEnd ? node.pages : [];
   }
 
-  /* ================= BUSCA MÚLTIPLA ================= */
-
-  /*
-    Busca múltiplas palavras e calcula relevância.
-  */
   searchMultiple(words) {
     const relevanceMap = {};
 
@@ -128,12 +117,8 @@ class Trie {
 
   /* ================= REMOÇÃO ================= */
 
-  /*
-    Remove associação palavra ↔ página.
-    Utiliza recursão para limpeza de nós.
-  */
   remove(word, page) {
-    const removeRecursive = (node, word, depth) => {
+    const removeRecursive = (node, depth) => {
       if (!node) return false;
 
       if (depth === word.length) {
@@ -144,21 +129,18 @@ class Trie {
 
       const char = word[depth];
 
-      if (removeRecursive(node.children[char], word, depth + 1)) {
+      if (removeRecursive(node.children[char], depth + 1)) {
         delete node.children[char];
       }
 
       return Object.keys(node.children).length === 0 && !node.isEnd;
     };
 
-    removeRecursive(this.root, word, 0);
+    removeRecursive(this.root, 0);
   }
 
-  /* ================= VISUALIZAÇÃO ================= */
+  /* ================= VISUALIZAÇÃO TEXTUAL ================= */
 
-  /*
-    Gera representação textual da Trie.
-  */
   print(node = this.root, prefix = "", output = []) {
     if (node.isEnd) {
       output.push(prefix + " → " + node.pages.join(", "));
@@ -170,20 +152,46 @@ class Trie {
 
     return output;
   }
+
+  /* ================= VISUALIZAÇÃO GRÁFICA ================= */
+
+  /*
+    Converte a Trie em dados de grafo (nós + arestas)
+    para uso com D3.js
+  */
+  toGraphData() {
+    const nodes = [];
+    const links = [];
+    let id = 0;
+
+    const traverse = (node, parentId = null, label = "ROOT") => {
+      const currentId = id++;
+
+      nodes.push({
+        id: currentId,
+        label,
+        isEnd: node.isEnd,
+        pages: node.pages
+      });
+
+      if (parentId !== null) {
+        links.push({ source: parentId, target: currentId });
+      }
+
+      for (let c in node.children) {
+        traverse(node.children[c], currentId, c);
+      }
+    };
+
+    traverse(this.root);
+    return { nodes, links };
+  }
 }
 
 /* =========================================================
    CLASSE SearchEngine (CAMADA DE CONTROLE)
    ========================================================= */
 
-/*
-  Classe que representa a APLICAÇÃO.
-
-  Ela:
-  - Controla a interface
-  - Usa a Trie
-  - Gerencia persistência
-*/
 class SearchEngine {
   constructor() {
     this.trie = new Trie();
@@ -208,18 +216,13 @@ class SearchEngine {
     this.pagesData[page] = description;
 
     [...new Set(
-      keywords
-        .split(",")
-        .flatMap(k => k.split(" "))
+      keywords.split(",").flatMap(k => k.split(" "))
         .map(normalizeWord)
         .filter(Boolean)
-    )]
-      .forEach(word => this.trie.insert(word, page));
+    )].forEach(word => this.trie.insert(word, page));
 
     this.save();
     this.renderTree();
-
-    alert("Página cadastrada com sucesso!");
 
     pageAddInput.value = "";
     descriptionAddInput.value = "";
@@ -232,14 +235,9 @@ class SearchEngine {
     const page = normalizePage(pageRemoveInput.value);
     const keywords = keywordsRemoveInput.value.trim();
 
-    if (!page || !keywords) {
-      alert("Informe os dados.");
-      return;
-    }
+    if (!page || !keywords) return;
 
-    keywords
-      .split(",")
-      .flatMap(k => k.split(" "))
+    keywords.split(",").flatMap(k => k.split(" "))
       .map(normalizeWord)
       .filter(Boolean)
       .forEach(word => this.trie.remove(word, page));
@@ -248,11 +246,6 @@ class SearchEngine {
 
     this.save();
     this.renderTree();
-
-    alert("Página removida com sucesso!");
-
-    pageRemoveInput.value = "";
-    keywordsRemoveInput.value = "";
   }
 
   /* ================= BUSCA ================= */
@@ -292,15 +285,15 @@ class SearchEngine {
   }
 
   load() {
-    const data = JSON.parse(localStorage.getItem("trieData") || "null");
+    const data = JSON.parse(localStorage.getItem("trieData"));
     if (!data) return;
 
-    const rebuild = nodeData => {
+    const rebuild = dataNode => {
       const node = new TrieNode();
-      node.isEnd = nodeData.isEnd;
-      node.pages = nodeData.pages;
-      for (let c in nodeData.children) {
-        node.children[c] = rebuild(nodeData.children[c]);
+      node.isEnd = dataNode.isEnd;
+      node.pages = dataNode.pages;
+      for (let c in dataNode.children) {
+        node.children[c] = rebuild(dataNode.children[c]);
       }
       return node;
     };
@@ -309,14 +302,83 @@ class SearchEngine {
     this.pagesData = data.pagesData;
   }
 
+  /* ================= RENDERIZAÇÃO ================= */
+
   renderTree() {
+    /* Texto */
     treeView.textContent = this.trie.print().join("\n") || "Árvore vazia";
+
+    /* Gráfico */
+    this.renderGraph();
+  }
+
+  renderGraph() {
+    const { nodes, links } = this.trie.toGraphData();
+    const container = document.getElementById("trieGraph");
+
+    d3.select(container).selectAll("*").remove();
+
+    const width = container.clientWidth;
+    const height = container.clientHeight;
+
+    const svg = d3.select(container)
+      .append("svg")
+      .attr("width", width)
+      .attr("height", height)
+      .call(d3.zoom().on("zoom", e => g.attr("transform", e.transform)));
+
+    const g = svg.append("g");
+
+    const sim = d3.forceSimulation(nodes)
+      .force("link", d3.forceLink(links).id(d => d.id).distance(60))
+      .force("charge", d3.forceManyBody().strength(-300))
+      .force("center", d3.forceCenter(width / 2, height / 2));
+
+    const link = g.selectAll("line")
+      .data(links)
+      .enter()
+      .append("line")
+      .attr("stroke", "#aaa");
+
+    const node = g.selectAll("g")
+      .data(nodes)
+      .enter()
+      .append("g")
+      .call(d3.drag()
+        .on("start", e => sim.alphaTarget(0.3).restart())
+        .on("drag", (e, d) => { d.fx = e.x; d.fy = e.y; })
+        .on("end", e => sim.alphaTarget(0))
+      );
+
+    node.append("circle")
+      .attr("r", 8)
+      .attr("fill", d => d.label === "ROOT" ? "#333" : d.isEnd ? "#4CAF50" : "#2196F3");
+
+    node.append("text")
+      .text(d => d.label)
+      .attr("x", 10)
+      .attr("y", 4)
+      .style("font-size", "12px");
+
+    node.append("title")
+      .text(d => d.pages.length ? d.pages.join(", ") : "Sem páginas");
+
+    sim.on("tick", () => {
+      link
+        .attr("x1", d => d.source.x)
+        .attr("y1", d => d.source.y)
+        .attr("x2", d => d.target.x)
+        .attr("y2", d => d.target.y);
+
+      node.attr("transform", d => `translate(${d.x}, ${d.y})`);
+    });
   }
 }
 
 /* =========================================================
    INTERFACE
    ========================================================= */
+
 const pageAddInput = document.getElementById("pageAddInput");
 const descriptionAddInput = document.getElementById("descriptionAddInput");
 const keywordsAddInput = document.getElementById("keywordsAddInput");
@@ -331,4 +393,5 @@ const treeView = document.getElementById("treeView");
 /* =========================================================
    INICIALIZAÇÃO
    ========================================================= */
+
 window.engine = new SearchEngine();

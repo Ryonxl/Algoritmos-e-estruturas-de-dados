@@ -5,13 +5,16 @@
   <meta charset="UTF-8">
   <title>Buscador Web com Trie</title>
   <link rel="stylesheet" href="style.css">
+
+  <!-- D3.js (visualização gráfica interativa) -->
+  <script src="https://d3js.org/d3.v7.min.js"></script>
 </head>
 
 <body>
 
   <header class="hero">
     <div class="hero-content">
-      <h1>🔎 Buscador Web</h1>
+      <h1>🔎 Busca Busca</h1>
       <p>Infraestrutura própria de indexação baseada em Árvores Trie</p>
       <span class="badge">Algoritmos e Estruturas de Dados • IFPE</span>
     </div>
@@ -41,7 +44,7 @@
 
       <button onclick="engine.addPage()">➕ Indexar Página</button>
     </section>
-    
+
     <!-- BUSCA -->
     <section class="card">
       <h2>🔍 Busca</h2>
@@ -74,11 +77,18 @@
       <button class="danger" onclick="engine.removePage()">Remover Página</button>
     </section>
 
-    <!-- VISUALIZAÇÃO DA ÁRVORE -->
+    <!-- VISUALIZAÇÃO TEXTUAL -->
     <section class="card tree">
-      <h2>🌳 Estrutura da Árvore Trie</h2>
+      <h2>🌳 Estrutura da Árvore Trie (Texto)</h2>
       <p class="subtitle">Visualização textual da infraestrutura</p>
       <pre id="treeView"></pre>
+    </section>
+
+    <!-- VISUALIZAÇÃO GRÁFICA -->
+    <section class="card tree">
+      <h2>📊 Estrutura da Árvore Trie (Gráfico Interativo)</h2>
+      <p class="subtitle">Nós, conexões, zoom e arraste</p>
+      <div id="trieGraph" style="width:100%; height:600px; border:1px solid #ccc;"></div>
     </section>
 
   </main>
